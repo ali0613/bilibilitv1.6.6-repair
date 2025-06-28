@@ -6,6 +6,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      package_name:
+        description: '输入要修改的包名'
+        required: false
+        default: ''
 
 jobs:
   build:
@@ -30,8 +35,6 @@ jobs:
         run: |
           # 从GitHub仓库下载预编译的signapk（需提前确认可用链接）
           wget https://github.com/appium/signapk/releases/download/v1.0/signapk.jar -O signapk.jar
-          # 或自行编译（若需）
-          # javac SignApk.java -d .
 
       - name: 执行普通编译
         if: github.event_name == 'push'
@@ -41,9 +44,7 @@ jobs:
       - name: 执行特殊编译（带包名参数）
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.package_name != ''
         run: |
-          ./build.sh -s ${{ github.event.inputs.package_name }}
-        with:
-          package_name: ${{ github.event.inputs.package_name }}
+          ./build.sh -s "${{ github.event.inputs.package_name }}"
 
       - name: 上传编译产物（可选）
         uses: actions/upload-artifact@v3
